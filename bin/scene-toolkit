@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+
+$:.unshift(File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib')))
+
+require 'rubygems'
+require 'optitron'
+require 'scene_toolkit'
+
+
+Optitron.dispatch(SceneToolkit::CLI.new) do
+
+  cmd "verify", "Verify library or release. Executes all validations if none specified" do
+    arg "directory", "The root directory to verify"
+    opt "name", "Validate release name"
+    opt "required-files", "Validate inclusion of required files"
+    opt "checksum", "Validate release CRC-32 checksum"
+    opt "display-valid", "Display valid releases too"
+    opt "flush-cache", "Flush file modification cache"
+    opt "move-invalid-to", "Move INVALID releases to specified folder", :type => :string
+    opt "move-valid-to", "Move VALID releases to specified folder", :type => :string
+  end
+end
