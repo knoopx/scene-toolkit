@@ -99,7 +99,6 @@ class SceneToolkit::CLI
     raise ArgumentError("#{source} is not a directory") unless File.directory?(source)
 
     releases = []
-    uids = {}
 
     Dir.glob(File.join(source, "**", "*.mp3")).each do |file|
       release_path = File.expand_path(File.dirname(file))
@@ -108,12 +107,6 @@ class SceneToolkit::CLI
         release = SceneToolkit::Release.new(release_path, @cache)
         releases << release_path
         yield(release)
-
-        if uids.has_key?(release.uid)
-          release.errors << "Duplicate release of #{uids[release.uid]}"
-        else
-          uids[release.uid] = release.path
-        end
       end
     end
   end
