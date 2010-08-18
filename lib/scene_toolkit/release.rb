@@ -24,18 +24,21 @@ class SceneToolkit::Release
     @path = path
     @name = File.basename(path)
     @uid = Digest::MD5.hexdigest(@name.downcase.gsub(/[^A-Z0-9]/i, ' ').gsub(/\s+/, ' '))
-    @errors = []
+    @errors = {}
+    VALIDATIONS.each do |validation|
+      @errors[validation] = []
+    end
   end
 
-  def valid?(validate = VALIDATIONS)
+  def valid?(validations = VALIDATIONS)
     if @cache.releases.modified?(self)
       @errors = []
-      validate.each do |validation|
+      validations.each do |validation|
         send("valid_#{validation}?")
       end
       @cache.releases.store(self)
     else
-      @errors = @cache.releases.errors(self)
+      @errors = @cache.releases.errors(self, validations)
     end
     @errors.none?
   end
@@ -43,8 +46,8 @@ class SceneToolkit::Release
   def valid_required_files?
     REQUIRED_FILES.each do |ext|
       file_count = send("#{ext}_files")
-      @errors << "No #{ext} found." if file_count.none?
-      @errors << "Multiple #{ext} found." if file_count.size > 1
+      @errors[:required_files] << "No #{ext} found." if file_count.none?
+      @errors[:required_files] << "Multiple #{ext} found." if file_count.size > 1
     end
   end
 
@@ -74,10 +77,10 @@ class SceneToolkit::Release
         filename, checksum = match.captures
         if files_to_check.has_key?(filename.downcase)
           unless Zlib.crc32(File.read(files_to_check[filename.downcase])).eql?(checksum.hex)
-            @errors << "#{filename} is corrupted"
+            @errors[:checksum] << "#{filename} is corrupted"
           end
         else
-          @errors << "File #{filename} not found"
+          @errors[:checksum] << "File #{filename} not found"
         end
         matched_something = true
       end
@@ -85,9 +88,9 @@ class SceneToolkit::Release
   end
 
   def valid_name?
-    @errors << "Release name is not a valid scene release name" unless @name =~ /^([A-Z0-9\-_.()&]+)\-(\d{4}|\d{3}x|\d{2}xx)\-([A-Z0-9_]+)$/i
-    @errors << "Release name is lowercased" if @name.eql?(@name.downcase)
-    @errors << "Release name is uppercased" if @name.eql?(@name.upcase)
+    @errors[:name] << "Release name is not a valid scene release name" unless @name =~ /^([A-Z0-9\-_.()&]+)\-(\d{4}|\d{3}x|\d{2}xx)\-([A-Z0-9_]+)$/i
+    @errors[:name] << "Release name is lowercased" if @name.eql?(@name.downcase)
+    @errors[:name] << "Release name is uppercased" if @name.eql?(@name.upcase)
   end
 end
 
