@@ -1,6 +1,22 @@
 = Scene-Toolkit
 
+== Description
+
 Tool to assist scene MP3 library maintenance
+
+== Summary
+
+    $ scene-toolkit
+    Commands
+
+    verify [directory]       # Verify library or release. Executes all validations if none specified
+      -n/--name              # Validate release name
+      -r/--required-files    # Validate inclusion of required files
+      -c/--checksum          # Validate release CRC-32 checksum
+      -d/--display-valid     # Display valid releases too
+      -f/--flush-cache       # Flush file modification cache
+      -m/--move-invalid-to=[STRING]   # Move INVALID releases to specified folder
+      -M/--move-valid-to=[STRING]   # Move VALID releases to specified folder
 
 == Note on Patches/Pull Requests
  
