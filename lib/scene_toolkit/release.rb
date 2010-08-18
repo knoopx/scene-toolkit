@@ -32,13 +32,14 @@ class SceneToolkit::Release
           # execute validation if release was catched but this particular validation was not executed
           send("valid_#{validation}?")
         else
-          @errors.merge!()
+          @errors.merge!(validation_errors)
         end
       end
     end
     
     @cache.releases.store(self)
-    @errors.none?
+
+    @errors.sum { |validation, errors| errors.size }.zero?
   end
 
   def valid_required_files?
