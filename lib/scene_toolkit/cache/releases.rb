@@ -24,10 +24,10 @@ class SceneToolkit::Cache::Releases
     end
   end
 
-  def errors(release)
+  def errors(release, validations = SceneToolkit::Release::VALIDATIONS)
     @cache.transaction(true) do
       if @cache[@cache_key].has_key?(release.path)
-        @cache[@cache_key][release.path][:errors]
+        @cache[@cache_key][release.path][:errors].reject{ |validation, errors| not validations.include?(validation) }
       else
         raise RuntimeError.new("Release not catched")
       end

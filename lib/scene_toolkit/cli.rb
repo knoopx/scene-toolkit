@@ -56,8 +56,10 @@ class SceneToolkit::CLI
         invalid_releases += 1
         puts release.name.foreground(:red)
         puts release.path
-        release.errors.each do |error|
-          puts " - #{error}"
+        release.errors.each do |validation, errors|
+          errors.each do |error|
+            puts " - #{error}"
+          end
         end
 
         puts
