@@ -8,39 +8,41 @@ class SceneToolkit::Release
   attr_accessor :name, :path, :uid
   attr_accessor :errors
 
-  class << self
-    def has_files_with_extension(*exts)
-      exts.each do |ext|
-        define_method "#{ext}_files" do
-          files.select { |f| File.extname(f).downcase.eql?(".#{ext}") }
-        end
-      end
-    end
-  end
-  has_files_with_extension :mp3, :sfv, :nfo, :m3u
-
   def initialize(path, cache)
     @cache = cache
     @path = path
     @name = File.basename(path)
     @uid = Digest::MD5.hexdigest(@name.downcase.gsub(/[^A-Z0-9]/i, ' ').gsub(/\s+/, ' '))
-    clear_errors
+    @errors = {}
   end
 
   def valid?(validations = VALIDATIONS)
+    @errors = {}
+
     if @cache.releases.modified?(self)
-      clear_errors
+      # if release was modified, invalidate all cached validations
+      @cache.releases.flush(self)
       validations.each do |validation|
         send("valid_#{validation}?")
       end
-      @cache.releases.store(self)
     else
-      @errors = @cache.releases.errors(self, validations)
+      validations.each do |validation|
+        validation_errors = @cache.releases.errors(self, [validation])
+        if validation_errors.nil?
+          # execute validation if release was catched but this particular validation was not executed
+          send("valid_#{validation}?")
+        else
+          @errors.merge!()
+        end
+      end
     end
+    
+    @cache.releases.store(self)
     @errors.none?
   end
 
   def valid_required_files?
+    @errors[:required_files] = {}
     REQUIRED_FILES.each do |ext|
       file_count = send("#{ext}_files")
       @errors[:required_files] << "No #{ext} found." if file_count.none?
@@ -48,11 +50,9 @@ class SceneToolkit::Release
     end
   end
 
-  def files
-    Dir.glob(File.join(@path, "*"))
-  end
-
   def valid_checksum?
+    @errors[:checksum] = {}
+    
     sfv_file = sfv_files.first
 
     return if sfv_file.nil?
@@ -85,18 +85,27 @@ class SceneToolkit::Release
   end
 
   def valid_name?
+    @errors[:name] = {}
     @errors[:name] << "Release name is not a valid scene release name" unless @name =~ /^([A-Z0-9\-_.()&]+)\-(\d{4}|\d{3}x|\d{2}xx)\-([A-Z0-9_]+)$/i
     @errors[:name] << "Release name is lowercased" if @name.eql?(@name.downcase)
     @errors[:name] << "Release name is uppercased" if @name.eql?(@name.upcase)
   end
 
-  protected
-
-  def clear_errors
-    @errors = {}
-    VALIDATIONS.each do |validation|
-      @errors[validation] = []
+  def files
+    Dir.glob(File.join(@path, "*"))
+  end
+  
+  class << self
+    protected
+    
+    def has_files_with_extension(*exts)
+      exts.each do |ext|
+        define_method "#{ext}_files" do
+          files.select { |f| File.extname(f).downcase.eql?(".#{ext}") }
+        end
+      end
     end
   end
+  has_files_with_extension :mp3, :sfv, :nfo, :m3u
 end
 
