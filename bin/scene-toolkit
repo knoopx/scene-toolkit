@@ -1,14 +1,10 @@
-#!/usr/bin/env ruby
+#!/usr/bin/env ruby -rubygems
 
 $:.unshift(File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib')))
 
-require 'rubygems'
-require 'optitron'
 require 'scene_toolkit'
 
-
 Optitron.dispatch(SceneToolkit::CLI.new) do
-
   cmd "verify", "Verify library or release. Executes all validations if none specified" do
     arg "directory", "The root directory to verify"
     opt "name", "Validate release name"

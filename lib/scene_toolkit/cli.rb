@@ -1,4 +1,9 @@
 require 'fileutils'
+
+gem 'rainbow', "~> 1.1"
+gem "optitron", "~> 0.0.9"
+
+require 'optitron'
 require 'rainbow'
 
 class SceneToolkit::CLI
