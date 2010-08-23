@@ -63,9 +63,9 @@ class SceneToolkit::Release
     playlist = m3u_files.first
 
     unless playlist.nil?
-      File.read(m3u_files.first).split(/[\r\n]+/).each do |track|
-        next if track.blank? or track.start_with?("#")
-        @errors[:playlist] << "File not found #{track}" unless File.exist?(File.join(@path, track))
+      File.read(playlist).split(/[\r\n]+/).each do |filename|
+        next if filename.blank? or filename.start_with?("#")
+        @errors[:playlist] << "File #{filename} not found (M3U)" unless File.exist?(File.join(@path, filename))
       end
     end
   end
@@ -94,10 +94,10 @@ class SceneToolkit::Release
         filename, checksum = match.captures
         if files_to_check.has_key?(filename.downcase)
           unless Zlib.crc32(File.read(files_to_check[filename.downcase])).eql?(checksum.hex)
-            @errors[:checksum] << "#{filename} is corrupted"
+            @errors[:checksum] << "File #{filename} is corrupted (SFV)"
           end
         else
-          @errors[:checksum] << "File #{filename} not found"
+          @errors[:checksum] << "File #{filename} not found (SFV)"
         end
         matched_something = true
       end
