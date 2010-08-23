@@ -3,21 +3,21 @@ require 'zlib'
 
 class SceneToolkit::Release
   REQUIRED_FILES = [:sfv, :nfo, :m3u]
-  VALIDATIONS = [:name, :required_files, :checksum]
+  VALIDATIONS = [:name, :required_files, :playlist, :checksum]
 
   attr_accessor :name, :path, :uid
-  attr_accessor :errors
+  attr_accessor :errors, :warnings
 
   def initialize(path, cache)
     @cache = cache
     @path = path
     @name = File.basename(path)
     @uid = Digest::MD5.hexdigest(@name.downcase.gsub(/[^A-Z0-9]/i, ' ').gsub(/\s+/, ' '))
-    @errors = {}
+    @errors, @warnings = {}, {}
   end
 
   def valid?(validations = VALIDATIONS)
-    @errors = {}
+    @errors, @warnings = {}, {}
 
     if @cache.releases.modified?(self)
       # if release was modified, invalidate all cached validations
@@ -34,26 +34,45 @@ class SceneToolkit::Release
         else
           @errors.merge!(validation_errors)
         end
+
+        validation_warnings = @cache.releases.warnings(self, [validation])
+        if validation_warnings.nil?
+          # execute validation if release was catched but this particular validation was not executed
+          send("valid_#{validation}?")
+        else
+          @warnings.merge!(validation_warnings)
+        end
       end
     end
-    
-    @cache.releases.store(self)
 
+    @cache.releases.store(self)
     @errors.sum { |validation, errors| errors.size }.zero?
   end
 
   def valid_required_files?
-    @errors[:required_files] = []
+    @errors[:required_files], @warnings[:required_files] = [], []
     REQUIRED_FILES.each do |ext|
       file_count = send("#{ext}_files")
       @errors[:required_files] << "No #{ext} found." if file_count.none?
-      @errors[:required_files] << "Multiple #{ext} found." if file_count.size > 1
+      @warnings[:required_files] << "Multiple #{ext} found." if file_count.size > 1
+    end
+  end
+
+  def valid_playlist?
+    @errors[:playlist], @warnings[:playlist] = [], []
+    playlist = m3u_files.first
+
+    unless playlist.nil?
+      File.read(m3u_files.first).split(/[\r\n]+/).each do |track|
+        next if track.blank? or track.start_with?("#")
+        @errors[:playlist] << "File not found #{track}" unless File.exist?(File.join(@path, track))
+      end
     end
   end
 
   def valid_checksum?
-    @errors[:checksum] = []
-    
+    @errors[:checksum], @warnings[:checksum] = [], []
+
     sfv_file = sfv_files.first
 
     return if sfv_file.nil?
@@ -67,9 +86,9 @@ class SceneToolkit::Release
     matched_something = false
 
     File.read(sfv_file).split(/[\r\n]+/).each do |line|
-#        if (/(generated|raped)/i =~ line and not /MorGoTH/i =~ line)
-#          @errors << "Possibly tampered SFV: #{line.strip}"
-#        end
+      if (/(generated|raped)/i =~ line and not /MorGoTH/i =~ line)
+        @warnings[:checksum] << "Possibly tampered SFV: #{line.strip}"
+      end
 
       if match = /^(.+?)\s+([\dA-Fa-f]{8})$/.match(line)
         filename, checksum = match.captures
@@ -86,7 +105,7 @@ class SceneToolkit::Release
   end
 
   def valid_name?
-    @errors[:name] = []
+    @errors[:name], @warnings[:name] = [], []
     @errors[:name] << "Release name is not a valid scene release name" unless @name =~ /^([A-Z0-9\-_.()&]+)\-(\d{4}|\d{3}x|\d{2}xx)\-([A-Z0-9_]+)$/i
     @errors[:name] << "Release name is lowercased" if @name.eql?(@name.downcase)
     @errors[:name] << "Release name is uppercased" if @name.eql?(@name.upcase)
@@ -95,10 +114,10 @@ class SceneToolkit::Release
   def files
     Dir.glob(File.join(@path, "*"))
   end
-  
+
   class << self
     protected
-    
+
     def has_files_with_extension(*exts)
       exts.each do |ext|
         define_method "#{ext}_files" do

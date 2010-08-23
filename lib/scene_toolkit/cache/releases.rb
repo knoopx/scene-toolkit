@@ -27,7 +27,17 @@ class SceneToolkit::Cache::Releases
   def errors(release, validations = SceneToolkit::Release::VALIDATIONS)
     @cache.transaction(true) do
       if @cache[@cache_key].has_key?(release.path)
-        @cache[@cache_key][release.path][:errors].reject{ |validation, errors| not validations.include?(validation) }
+        @cache[@cache_key][release.path][:errors].reject { |validation, errors| not validations.include?(validation) }
+      else
+        raise RuntimeError.new("Release not catched")
+      end
+    end
+  end
+
+  def warnings(release, validations = SceneToolkit::Release::VALIDATIONS)
+    @cache.transaction(true) do
+      if @cache[@cache_key].has_key?(release.path)
+        @cache[@cache_key][release.path][:warnings].reject { |validation, warnings| not validations.include?(validation) }
       else
         raise RuntimeError.new("Release not catched")
       end
@@ -56,6 +66,7 @@ class SceneToolkit::Cache::Releases
     @cache.transaction do
       @cache[@cache_key][release.path] = {}
       @cache[@cache_key][release.path][:errors] = release.errors
+      @cache[@cache_key][release.path][:warnings] = release.warnings
       @cache[@cache_key][release.path][:files] = Dir.glob(File.join(release.path, "*")).inject({}) do |collection, f|
         collection[File.basename(f)] = File.stat(f).mtime
         collection
