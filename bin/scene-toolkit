@@ -13,6 +13,7 @@ Optitron.dispatch(SceneToolkit::CLI.new) do
     opt "checksum", "Validate release CRC-32 checksum"
     opt "hide-valid", "Do not display valid releases"
     opt "flush-cache", "Flush file modification cache"
+    opt "skip-cache", "Force re-validation of releases"
     opt "move-invalid-to", "Move INVALID releases to specified folder", :type => :string
     opt "move-valid-to", "Move VALID releases to specified folder", :type => :string
   end

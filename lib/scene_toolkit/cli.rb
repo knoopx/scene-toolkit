@@ -31,13 +31,13 @@ class SceneToolkit::CLI
       raise ArgumentError.new("#{invalid_target_directory} does not exist") unless File.directory?(invalid_target_directory)
     end
 
-
     valid_target_directory = opts.delete(:move_valid_to)
     unless valid_target_directory.nil?
       raise ArgumentError.new("#{invalid_target_directory} does not exist") unless File.directory?(valid_target_directory)
     end
 
     flush_cache if opts.delete(:flush_cache)
+    skip_cache = opts.delete(:skip_cache) || false
 
     release_count = 0
     valid_releases = 0
@@ -46,7 +46,7 @@ class SceneToolkit::CLI
     each_release(directory) do |release|
       release_count += 1
 
-      if release_valid = release.valid?(validations)
+      if release_valid = release.valid?(validations, skip_cache)
         valid_releases += 1
         puts release.name.foreground(:green) unless opts[:hide_valid]
       else

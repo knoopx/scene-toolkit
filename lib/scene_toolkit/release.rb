@@ -16,10 +16,10 @@ class SceneToolkit::Release
     @errors, @warnings = {}, {}
   end
 
-  def valid?(validations = VALIDATIONS)
+  def valid?(validations = VALIDATIONS, skip_cache = false)
     @errors, @warnings = {}, {}
 
-    if @cache.releases.modified?(self)
+    if skip_cache or @cache.releases.modified?(self)
       # if release was modified, invalidate all cached validations
       @cache.releases.flush(self)
       validations.each do |validation|
@@ -74,7 +74,6 @@ class SceneToolkit::Release
     @errors[:checksum], @warnings[:checksum] = [], []
 
     sfv_file = sfv_files.first
-
     return if sfv_file.nil?
 
     files_to_check = files.inject({}) do |collection, file|
