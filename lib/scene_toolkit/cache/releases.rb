@@ -13,7 +13,6 @@ class SceneToolkit::Cache::Releases
         @cache[@cache_key][release.path][:files].each do |filename, mtime|
           file_path = File.join(release.path, filename)
           unless File.exists?(file_path) and (@cache[@cache_key][release.path][:files].has_key?(filename) and File.stat(file_path).mtime.eql?(mtime))
-            flush(release)
             return true
           end
         end
