@@ -8,44 +8,18 @@ class SceneToolkit::Release
   attr_accessor :name, :path, :uid
   attr_accessor :errors, :warnings
 
-  def initialize(path, cache)
-    @cache = cache
+  def initialize(path)
     @path = path
     @name = File.basename(path)
     @uid = Digest::MD5.hexdigest(@name.downcase.gsub(/[^A-Z0-9]/i, ' ').gsub(/\s+/, ' '))
     @errors, @warnings = {}, {}
   end
 
-  def valid?(validations = VALIDATIONS, skip_cache = false)
+  def valid?(validations = VALIDATIONS)
     @errors, @warnings = {}, {}
-
-    if skip_cache or @cache.releases.modified?(self)
-      # if release was modified, invalidate all cached validations
-      @cache.releases.flush(self)
-      validations.each do |validation|
-        send("valid_#{validation}?")
-      end
-    else
-      validations.each do |validation|
-        validation_errors = @cache.releases.errors(self, [validation])
-        if validation_errors.nil?
-          # execute validation if release was catched but this particular validation was not executed
-          send("valid_#{validation}?")
-        else
-          @errors.merge!(validation_errors)
-        end
-
-        validation_warnings = @cache.releases.warnings(self, [validation])
-        if validation_warnings.nil?
-          # execute validation if release was catched but this particular validation was not executed
-          send("valid_#{validation}?")
-        else
-          @warnings.merge!(validation_warnings)
-        end
-      end
+    validations.each do |validation|
+      send("valid_#{validation}?")
     end
-
-    @cache.releases.store(self)
     @errors.sum { |validation, errors| errors.size }.zero?
   end
 

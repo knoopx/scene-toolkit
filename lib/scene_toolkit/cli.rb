@@ -7,14 +7,6 @@ require 'optitron'
 require 'rainbow'
 
 class SceneToolkit::CLI
-  def initialize
-    @cache = SceneToolkit::Cache::Base.new
-  end
-
-  def flush_cache
-    @cache.releases.flush_all
-  end
-
   def verify(directory, opts)
     opts.underscore_and_symbolize_keys!
     validations = []
@@ -36,9 +28,6 @@ class SceneToolkit::CLI
       raise ArgumentError.new("#{invalid_target_directory} does not exist") unless File.directory?(valid_target_directory)
     end
 
-    flush_cache if opts.delete(:flush_cache)
-    skip_cache = opts.delete(:skip_cache) || false
-
     release_count = 0
     valid_releases = 0
     invalid_releases = 0
@@ -46,7 +35,7 @@ class SceneToolkit::CLI
     each_release(directory) do |release|
       release_count += 1
 
-      if release_valid = release.valid?(validations, skip_cache)
+      if release_valid = release.valid?(validations)
         valid_releases += 1
         puts release.name.foreground(:green) unless opts[:hide_valid]
       else
@@ -110,7 +99,7 @@ class SceneToolkit::CLI
       release_path = File.expand_path(File.dirname(file))
 
       unless releases.include?(release_path)
-        release = SceneToolkit::Release.new(release_path, @cache)
+        release = SceneToolkit::Release.new(release_path)
         releases << release_path
         yield(release)
       end
