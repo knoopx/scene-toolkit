@@ -64,7 +64,8 @@ class SceneToolkit::Release
 
     unless playlist.nil?
       File.read(playlist).split(/[\r\n]+/).each do |filename|
-        next if filename.blank? or filename.start_with?("#")
+        filename.strip!
+        next if filename.blank? or filename.start_with?("#") or filename.start_with?(";")
         @errors[:playlist] << "File #{filename} not found (M3U)" unless File.exist?(File.join(@path, filename))
       end
     end
@@ -72,34 +73,39 @@ class SceneToolkit::Release
 
   def valid_checksum?
     @errors[:checksum], @warnings[:checksum] = [], []
+    sfv = sfv_files.first
 
-    sfv_file = sfv_files.first
-    return if sfv_file.nil?
-
-    files_to_check = files.inject({}) do |collection, file|
-      collection[File.basename(file).downcase] = File.expand_path(file)
-      collection
-    end
-
-    matched_something = false
-    File.read(sfv_file).split(/[\r\n]+/).each do |line|
-      if (/(generated|raped)/i =~ line and not /MorGoTH/i =~ line)
-        @warnings[:checksum] << "Possibly tampered SFV: #{line.strip}"
+    unless sfv.blank? do
+      files_to_check = files.inject({}) do |collection, file|
+        collection[File.basename(file).downcase] = File.expand_path(file)
+        collection
       end
 
-      if match = /^(.+?)\s+([\dA-Fa-f]{8})$/.match(line)
-        filename, checksum = match.captures
-        if files_to_check.has_key?(filename.downcase)
-          unless Zlib.crc32(File.read(files_to_check[filename.downcase])).eql?(checksum.hex)
-            @errors[:checksum] << "File #{filename} is corrupted (SFV)"
-          end
-        else
-          @errors[:checksum] << "File #{filename} not found (SFV)"
+      matched_something = false
+      File.read(sfv).split(/[\r\n]+/).each do |line|
+        line.strip!
+
+        if (/(generated|raped)/i =~ line and not /MorGoTH/i =~ line)
+          @warnings[:checksum] << "Possibly tampered SFV: #{line.strip}"
         end
-        matched_something = true
+
+        if match = /^(.+?)\s+([\dA-Fa-f]{8})$/.match(line)
+          matched_something = true
+          filename, checksum = match.captures
+          filename.strip!.downcase!
+
+          if files_to_check.has_key?(filename)
+            unless Zlib.crc32(File.read(files_to_check[filename])).eql?(checksum.hex)
+              @errors[:checksum] << "File #{filename} is corrupted (SFV)"
+            end
+          else
+            @errors[:checksum] << "File #{filename} not found (SFV)"
+          end
+        end
       end
+      @warnings[:checksum] << "No files to verify found (SFV)" unless matched_something
     end
-    @warnings[:checksum] << "No files to verify found (SFV)" unless matched_something
+    end
   end
 
   def valid_name?
