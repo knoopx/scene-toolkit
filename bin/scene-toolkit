@@ -5,6 +5,7 @@ $:.unshift(File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib')))
 require 'scene_toolkit'
 
 Optitron.dispatch(SceneToolkit::CLI.new) do
+  help
   cmd "verify", "Verify library or release. Executes all validations if none specified" do
     arg "directory", "The root directory to verify"
     opt "name", "Validate release name"
