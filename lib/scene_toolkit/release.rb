@@ -82,9 +82,7 @@ class SceneToolkit::Release
       collection
     end
 
-    #todo: set warning if no matches were found on sfv file
     matched_something = false
-
     File.read(sfv_file).split(/[\r\n]+/).each do |line|
       if (/(generated|raped)/i =~ line and not /MorGoTH/i =~ line)
         @warnings[:checksum] << "Possibly tampered SFV: #{line.strip}"
@@ -102,6 +100,7 @@ class SceneToolkit::Release
         matched_something = true
       end
     end
+    @warnings[:checksum] << "No files to verify found (SFV)" unless matched_something
   end
 
   def valid_name?
