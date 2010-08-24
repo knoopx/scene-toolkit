@@ -37,13 +37,15 @@ class SceneToolkit::CLI
 
       if release_valid = release.valid?(validations)
         valid_releases += 1
-        puts release.name.foreground(:green) unless opts[:hide_valid]
+        unless opts[:hide_valid]
+          puts release.name.foreground(:green)
+          puts release.path
+        end
       else
         invalid_releases += 1
         puts release.name.foreground(:red)
+        puts release.path
       end
-
-      puts release.path
 
       release.errors.each do |validation, errors|
         errors.each do |error|
@@ -64,7 +66,7 @@ class SceneToolkit::CLI
       unless invalid_target_directory.nil?
         move_release(release, invalid_target_directory) unless release_valid
       end
-      
+
       puts
     end
 
