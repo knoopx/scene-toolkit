@@ -46,32 +46,36 @@ class SceneToolkit::CLI
     each_release(directory) do |release|
       release_count += 1
 
-      if release.valid?(validations)
+      if release_valid = release.valid?(validations)
         valid_releases += 1
         puts release.name.foreground(:green) unless opts[:hide_valid]
-        move_release(release, valid_target_directory) unless valid_target_directory.nil?
       else
         invalid_releases += 1
         puts release.name.foreground(:red)
-        move_release(release, invalid_target_directory) unless invalid_target_directory.nil?
       end
 
       puts release.path
 
-      puts "#{release.errors.values.sum(&:count)} errors"
       release.errors.each do |validation, errors|
         errors.each do |error|
-          puts " - #{error}".foreground(:red)
+          puts "  ✕ #{error}".foreground(:red)
         end
       end
 
-      puts "#{release.warnings.values.sum(&:count)} warnings"
       release.warnings.each do |validation, warnings|
         warnings.each do |warning|
-          puts " - #{warning}".foreground(:yellow)
+          puts "  ✕ #{warning}".foreground(:yellow)
         end
       end
 
+      unless valid_target_directory.nil?
+        move_release(release, valid_target_directory) if release_valid
+      end
+
+      unless invalid_target_directory.nil?
+        move_release(release, invalid_target_directory) unless release_valid
+      end
+      
       puts
     end
 
@@ -83,10 +87,10 @@ class SceneToolkit::CLI
 
   def move_release(release, destination)
     target_dir = File.join(destination, release.name)
-    puts "Moving release to #{target_dir}".foreground(:yellow)
+    puts "  ■ Moving release to #{target_dir}".foreground(:yellow)
 
     if File.directory?(target_dir)
-      puts "Target directory already exists. Skipping.".foreground(:red)
+      puts "  ✕ Target directory already exists. Skipping.".foreground(:red)
     else
       begin
         FileUtils.mv(release.path, target_dir)
@@ -94,7 +98,6 @@ class SceneToolkit::CLI
         puts e.message.foreground(:red)
       end
     end
-    puts
   end
 
   def each_release(source, &block)
@@ -113,4 +116,5 @@ class SceneToolkit::CLI
       end
     end
   end
+
 end
