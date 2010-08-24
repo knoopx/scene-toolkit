@@ -34,47 +34,53 @@ class SceneToolkit::CLI
 
     each_release(directory) do |release|
       release_count += 1
-
-      if release_valid = release.valid?(validations)
+      if release.valid?(validations)
         valid_releases += 1
-        unless opts[:hide_valid]
+        if not opts[:hide_valid] or not valid_target_directory.nil?
           puts release.name.foreground(:green)
           puts release.path
+          print_errors(release)
+          print_warnings(release)
+          unless valid_target_directory.nil?
+            move_release(release, valid_target_directory)
+          end
+          puts
         end
       else
         invalid_releases += 1
         puts release.name.foreground(:red)
         puts release.path
-      end
-
-      release.errors.each do |validation, errors|
-        errors.each do |error|
-          puts "  ✕ #{error}".foreground(:red)
+        print_errors(release)
+        print_warnings(release)
+        unless invalid_target_directory.nil?
+          move_release(release, invalid_target_directory)
         end
+        puts
       end
-
-      release.warnings.each do |validation, warnings|
-        warnings.each do |warning|
-          puts "  ✕ #{warning}".foreground(:yellow)
-        end
-      end
-
-      unless valid_target_directory.nil?
-        move_release(release, valid_target_directory) if release_valid
-      end
-
-      unless invalid_target_directory.nil?
-        move_release(release, invalid_target_directory) unless release_valid
-      end
-
-      puts
     end
 
+    puts
     puts "#{valid_releases} of #{release_count} releases valid".foreground(:yellow)
     puts "#{invalid_releases} of #{release_count} releases invalid".foreground(:yellow)
   end
 
   protected
+
+  def print_errors(release)
+    release.errors.each do |validation, errors|
+      errors.each do |error|
+        puts "  ✕ #{error}".foreground(:red)
+      end
+    end
+  end
+
+  def print_warnings(release)
+    release.warnings.each do |validation, warnings|
+      warnings.each do |warning|
+        puts "  ✕ #{warning}".foreground(:yellow)
+      end
+    end
+  end
 
   def move_release(release, destination)
     target_dir = File.join(destination, release.name)
