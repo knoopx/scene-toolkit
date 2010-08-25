@@ -16,4 +16,10 @@ Optitron.dispatch(SceneToolkit::CLI.new) do
     opt "move-invalid-to", "Move INVALID releases to specified folder", :type => :string
     opt "move-valid-to", "Move VALID releases to specified folder", :type => :string
   end
+
+  cmd "repair", "Repair releases" do
+    arg "directory", "The root directory to repair"
+    opt "playlist", "Repair wrong playlist or generate missing ones"
+    opt "force", "Force the modification of existing files"
+  end
 end

@@ -30,6 +30,7 @@ class SceneToolkit::Release
       @errors[:required_files] << "No *.#{ext} files found." if file_count.none?
       @warnings[:required_files] << "Multiple *.#{ext} files found." if file_count.size > 1
     end
+    @warnings[:required_files].empty?
   end
 
   def valid_playlist?
@@ -45,6 +46,7 @@ class SceneToolkit::Release
     else
       @errors[:playlist] << "No *.m3u files found"
     end
+    @errors[:playlist].empty?
   end
 
   def valid_checksum?
@@ -85,6 +87,7 @@ class SceneToolkit::Release
     else
       @errors[:checksum] << "No *.sfv files found"
     end
+    @errors[:checksum].empty?
   end
 
   def valid_name?
@@ -92,6 +95,7 @@ class SceneToolkit::Release
     @errors[:name] << "Release name is not a valid scene release name" unless @name =~ /^([A-Z0-9\-_.()&]+)\-(\d{4}|\d{3}x|\d{2}xx)\-([A-Z0-9_]+)$/i
     @errors[:name] << "Release name is lowercased" if @name.eql?(@name.downcase)
     @errors[:name] << "Release name is uppercased" if @name.eql?(@name.upcase)
+    @errors[:name].empty?
   end
 
   def files

@@ -7,6 +7,41 @@ require 'optitron'
 require 'rainbow'
 
 class SceneToolkit::CLI
+  def repair(directory, opts)
+    opts.underscore_and_symbolize_keys!
+
+    each_release(directory) do |release|
+      if opts[:playlist]
+        unless release.valid_playlist?
+          puts release.name.foreground(:red)
+          puts release.path
+          print_errors(release)
+
+          candidates = release.files.select { |f| %w(.nfo .m3u .sfv).include?(File.extname(f).downcase) }.group_by { |f| File.basename(f, '.*') }
+          if candidates.none?
+            puts "  ✕ Unable to guess playlist filename".foreground(:red)
+            next
+          end
+
+          playlist_filename = [candidates.max { |k, v| v.size }.first, ".m3u"].join
+
+          playlist_path = File.join(release.path, playlist_filename)
+          if File.exist?(playlist_path) and not opts[:force]
+            puts "  ✕ Playlist #{playlist_filename} already exists. Use --force to replace it.".foreground(:red)
+          else
+            puts "  ■ Generating new playlist: #{playlist_filename}".foreground(:yellow)
+            File.open(playlist_path, "w") do |playlist_file|
+              release.mp3_files.map { |f| File.basename(f) }.each do |mp3_file|
+                playlist_file.puts mp3_file
+              end
+            end
+          end
+          puts
+        end
+      end
+    end
+  end
+
   def verify(directory, opts)
     opts.underscore_and_symbolize_keys!
     validations = []
