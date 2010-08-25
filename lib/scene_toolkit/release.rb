@@ -27,58 +27,63 @@ class SceneToolkit::Release
     @errors[:required_files], @warnings[:required_files] = [], []
     REQUIRED_FILES.each do |ext|
       file_count = send("#{ext}_files")
-      @errors[:required_files] << "No #{ext} found." if file_count.none?
-      @warnings[:required_files] << "Multiple #{ext} found." if file_count.size > 1
+      @errors[:required_files] << "No *.#{ext} files found." if file_count.none?
+      @warnings[:required_files] << "Multiple *.#{ext} files found." if file_count.size > 1
     end
   end
 
   def valid_playlist?
     @errors[:playlist], @warnings[:playlist] = [], []
-    playlist = m3u_files.first
-
-    unless playlist.nil?
-      File.read(playlist).split(/[\r\n]+/).each do |filename|
-        filename.strip!
-        next if filename.blank? or filename.start_with?("#") or filename.start_with?(";")
-        @errors[:playlist] << "File #{filename} not found (M3U)" unless File.exist?(File.join(@path, filename))
+    if m3u_files.any?
+      m3u_files.each do |playlist|
+        File.read(playlist).split(/[\r\n]+/).each do |filename|
+          filename.strip!
+          next if filename.blank? or filename.start_with?("#") or filename.start_with?(";")
+          @errors[:playlist] << "File #{filename} not found" unless File.exist?(File.join(@path, filename))
+        end
       end
+    else
+      @errors[:playlist] << "No *.m3u files found"
     end
   end
 
   def valid_checksum?
     @errors[:checksum], @warnings[:checksum] = [], []
-    sfv = sfv_files.first
 
-    unless sfv.blank? do
-      files_to_check = files.inject({}) do |collection, file|
-        collection[File.basename(file).downcase] = File.expand_path(file)
-        collection
-      end
-
-      matched_something = false
-      File.read(sfv).split(/[\r\n]+/).each do |line|
-        line.strip!
-
-        if (/(generated|raped)/i =~ line and not /MorGoTH/i =~ line)
-          @warnings[:checksum] << "Possibly tampered SFV: #{line.strip}"
+    if sfv_files.any?
+      sfv_files.each do |sfv|
+        files_to_check = files.inject({}) do |collection, file|
+          collection[File.basename(file).downcase] = File.expand_path(file)
+          collection
         end
 
-        if match = /^(.+?)\s+([\dA-Fa-f]{8})$/.match(line)
-          matched_something = true
-          filename, checksum = match.captures
-          filename.strip!.downcase!
+        matched_something = false
+        File.read(sfv).split(/[\r\n]+/).each do |line|
+          line.strip!
 
-          if files_to_check.has_key?(filename)
-            unless Zlib.crc32(File.read(files_to_check[filename])).eql?(checksum.hex)
-              @errors[:checksum] << "File #{filename} is corrupted (SFV)"
+          if (/(generated|raped)/i =~ line and not /MorGoTH/i =~ line)
+            @warnings[:checksum] << "Possibly tampered SFV: #{line.strip}"
+          end
+
+          if match = /^(.+?)\s+([\dA-Fa-f]{8})$/.match(line)
+            matched_something = true
+            filename, checksum = match.captures
+            filename.strip!
+            filename.downcase!
+
+            if files_to_check.has_key?(filename)
+              unless Zlib.crc32(File.read(files_to_check[filename])).eql?(checksum.hex)
+                @errors[:checksum] << "File #{filename} is corrupted"
+              end
+            else
+              @errors[:checksum] << "File #{filename} not found"
             end
-          else
-            @errors[:checksum] << "File #{filename} not found (SFV)"
           end
         end
+        @warnings[:checksum] << "No files to verify found" unless matched_something
       end
-      @warnings[:checksum] << "No files to verify found (SFV)" unless matched_something
-    end
+    else
+      @errors[:checksum] << "No *.sfv files found"
     end
   end
 

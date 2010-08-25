@@ -69,7 +69,7 @@ class SceneToolkit::CLI
   def print_errors(release)
     release.errors.each do |validation, errors|
       errors.each do |error|
-        puts "  ✕ #{error}".foreground(:red)
+        puts "  ✕ [#{validation.to_s.humanize}] #{error}".foreground(:red)
       end
     end
   end
@@ -77,7 +77,7 @@ class SceneToolkit::CLI
   def print_warnings(release)
     release.warnings.each do |validation, warnings|
       warnings.each do |warning|
-        puts "  ✕ #{warning}".foreground(:yellow)
+        puts "  ✕ [#{validation.to_s.humanize}] #{warning}".foreground(:yellow)
       end
     end
   end
