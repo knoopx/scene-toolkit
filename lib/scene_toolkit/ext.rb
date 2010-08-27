@@ -1,3 +1,1 @@
-module SceneToolkit::Ext
-  require 'scene_toolkit/ext/hash'
-end
+require 'scene_toolkit/ext/hash'
