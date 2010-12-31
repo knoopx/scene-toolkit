@@ -4,22 +4,4 @@ $:.unshift(File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib')))
 
 require 'scene_toolkit'
 
-Optitron.dispatch(SceneToolkit::CLI.new) do
-  help
-  cmd "verify", "Verify library or release. Executes all validations if none specified" do
-    arg "directory", "The root directory to verify"
-    opt "name", "Validate release name"
-    opt "required-files", "Validate inclusion of required files"
-    opt "playlist", "Validate playlist against existing files"
-    opt "checksum", "Validate release CRC-32 checksum"
-    opt "hide-valid", "Do not display valid releases"
-    opt "move-invalid-to", "Move INVALID releases to specified folder", :type => :string
-    opt "move-valid-to", "Move VALID releases to specified folder", :type => :string
-  end
-
-  cmd "repair", "Repair releases" do
-    arg "directory", "The root directory to repair"
-    opt "playlist", "Repair wrong playlist or generate missing ones"
-    opt "force", "Force the modification of existing files"
-  end
-end
+SceneToolkit::CLI.dispatch

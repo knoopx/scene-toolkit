@@ -1,11 +1,12 @@
 module SceneToolkit
   module Ext
     module Hash
-      def underscore_and_symbolize_keys!(specials={})
+      def underscore_and_symbolize_keys!
+        result = self.dup
         self.each_key do |k|
-          self[specials.has_key?(k) ? specials[k] : k.underscore] = self.delete(k)
+          result[k.underscore] = self[k]
         end
-        self.symbolize_keys!
+        result.symbolize_keys!
       end
     end
   end

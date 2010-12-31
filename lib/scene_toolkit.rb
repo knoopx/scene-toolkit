@@ -1,6 +1,7 @@
-gem "activesupport", "~> 2.3.5"
-require 'active_support'
+gem "activesupport", "~> 3.0.0"
 
-require 'scene_toolkit/ext'
+require 'active_support/all'
+
+require 'scene_toolkit/ext/hash'
 require 'scene_toolkit/release'
 require 'scene_toolkit/cli'

@@ -1,18 +1,24 @@
+# encoding: utf-8
+
 require 'fileutils'
 
 gem 'rainbow', "~> 1.1"
-gem "optitron", "~> 0.0.9"
+gem "optitron", "~> 0.2.2"
 
 require 'optitron'
 require 'rainbow'
 
 module SceneToolkit
-  class CLI
-    def repair(directory, opts)
-      opts.underscore_and_symbolize_keys!
+  class CLI < Optitron::CLI
+    desc "Repair releases"
+    opt "playlist", "Repair wrong playlist or generate missing ones"
+    opt "force", "Force the modification of existing files"
 
-      each_release(directory) do |release|
-        if opts[:playlist]
+    def repair(directory_string)
+      params.underscore_and_symbolize_keys!
+
+      each_release(directory_string) do |release|
+        if params[:playlist]
           unless release.valid_playlist?
             puts release.name.foreground(:red)
             puts release.path
@@ -26,8 +32,8 @@ module SceneToolkit
 
             playlist_filename = [candidates.max { |k, v| v.size }.first, ".m3u"].join
 
-            playlist_path = File.join(release.path, playlist_filename)
-            if File.exist?(playlist_path) and not opts[:force]
+            playlist_path     = File.join(release.path, playlist_filename)
+            if File.exist?(playlist_path) and not params[:force]
               puts "  ✕ Playlist #{playlist_filename} already exists. Use --force to replace it.".foreground(:red)
             else
               puts "  ■ Generating new playlist: #{playlist_filename}".foreground(:yellow)
@@ -43,36 +49,45 @@ module SceneToolkit
       end
     end
 
-    def verify(directory, opts)
-      opts.underscore_and_symbolize_keys!
+    desc "Verify library or release. Executes all validations if none specified"
+    opt "name", "Validate release name"
+    opt "required-files", "Validate inclusion of required files"
+    opt "playlist", "Validate playlist against existing files"
+    opt "checksum", "Validate release CRC-32 checksum"
+    opt "hide-valid", "Do not display valid releases"
+    opt "move-invalid-to", "Move INVALID releases to specified folder", :type => :string
+    opt "move-valid-to", "Move VALID releases to specified folder", :type => :string
+
+    def verify(directory_string)
+      params.underscore_and_symbolize_keys!
       validations = []
       SceneToolkit::Release::VALIDATIONS.each do |validation|
-        validations << validation if opts.delete(validation).eql?(true)
+        validations << validation if params.delete(validation).eql?(true)
       end
 
       if validations.none?
         validations = SceneToolkit::Release::VALIDATIONS
       end
 
-      invalid_target_directory = opts.delete(:move_invalid_to)
+      invalid_target_directory = params.delete(:move_invalid_to)
       unless invalid_target_directory.nil?
         raise ArgumentError.new("#{invalid_target_directory} does not exist") unless File.directory?(invalid_target_directory)
       end
 
-      valid_target_directory = opts.delete(:move_valid_to)
+      valid_target_directory = params.delete(:move_valid_to)
       unless valid_target_directory.nil?
         raise ArgumentError.new("#{invalid_target_directory} does not exist") unless File.directory?(valid_target_directory)
       end
 
-      release_count = 0
-      valid_releases = 0
+      release_count    = 0
+      valid_releases   = 0
       invalid_releases = 0
 
-      each_release(directory) do |release|
+      each_release(directory_string) do |release|
         release_count += 1
         if release.valid?(validations)
           valid_releases += 1
-          if not opts[:hide_valid] or not valid_target_directory.nil?
+          if not params[:hide_valid] or not valid_target_directory.nil?
             puts release.name.foreground(:green)
             puts release.path
             print_errors(release)
