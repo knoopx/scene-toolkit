@@ -11,9 +11,6 @@ begin
     gem.email       = "knoopx@gmail.com"
     gem.homepage    = "http://github.com/knoopx/scene-toolkit"
     gem.authors     = ["Víctor Martínez"]
-    gem.add_dependency "activesupport", "~> 3.0.0"
-    gem.add_dependency "rainbow", "~> 1.1"
-    gem.add_dependency "optitron", "~> 0.2.2"
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
