@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{scene-toolkit}
-  s.version = "0.1.7"
+  s.version = "0.1.8"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["V\303\255ctor Mart\303\255nez"]
@@ -30,7 +30,8 @@ Gem::Specification.new do |s|
     "lib/scene_toolkit/cli.rb",
     "lib/scene_toolkit/ext.rb",
     "lib/scene_toolkit/ext/hash.rb",
-    "lib/scene_toolkit/release.rb"
+    "lib/scene_toolkit/release.rb",
+    "scene-toolkit.gemspec"
   ]
   s.homepage = %q{http://github.com/knoopx/scene-toolkit}
   s.require_paths = ["lib"]
