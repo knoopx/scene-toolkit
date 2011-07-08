@@ -1,1 +1,5 @@
-require 'scene_towolkit/ext/hash'
+class String
+  def downcase?
+    self == self.downcase
+  end
+end
