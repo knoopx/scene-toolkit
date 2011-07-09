@@ -33,7 +33,7 @@ module SceneToolkit
           end
 
           matched_something = false
-          File.read(sfv).split(/[\r\n]+/).each do |line|
+          File.read(sfv, :mode => "rb").split(/[\r\n]+/).each do |line|
             line.strip!
 
             if (/(generated|raped)/i =~ line and not /MorGoTH/i =~ line)

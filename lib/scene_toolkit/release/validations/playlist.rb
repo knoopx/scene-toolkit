@@ -26,7 +26,7 @@ module SceneToolkit
         protected
 
         def validate_playlist(playlist)
-          File.read(playlist).split(/[\r\n]+/).each do |filename|
+          File.read(playlist, :mode => "rb").split(/[\r\n]+/).each do |filename|
             filename.strip!
             next if filename.blank? or filename.start_with?("#") or filename.start_with?(";")
             @errors[:playlist] << "File #{filename} not found" unless File.exist?(File.join(@path, filename))
