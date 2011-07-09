@@ -15,7 +15,7 @@ module SceneToolkit
               begin
                 validate_checksum(sfv)
               rescue => e
-                @errors[:playlist] << e.message
+                @errors[:checksum] << e.message
               end
             end
           else
