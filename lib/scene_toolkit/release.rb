@@ -4,7 +4,7 @@ require 'scene_toolkit/release/validations'
 require 'scene_toolkit/release/validations/checksum'
 require 'scene_toolkit/release/validations/name'
 require 'scene_toolkit/release/validations/playlist'
-require 'scene_toolkit/release/validations/required_files'
+require 'scene_toolkit/release/validations/files'
 
 module SceneToolkit
   class Release
@@ -18,7 +18,7 @@ module SceneToolkit
     include Validations::Checksum
     include Validations::Name
     include Validations::Playlist
-    include Validations::RequiredFiles
+    include Validations::Files
 
     def initialize(path)
       @path = File.expand_path(path)
