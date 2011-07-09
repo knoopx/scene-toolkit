@@ -44,6 +44,7 @@ module SceneToolkit
               matched_something = true
               filename, checksum = match.captures
               filename.strip!
+              next if filename.blank? or filename.start_with?("#") or filename.start_with?(";")
               filename.downcase!
 
               if files_to_check.has_key?(filename)
