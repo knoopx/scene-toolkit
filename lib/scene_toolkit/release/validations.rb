@@ -1,3 +1,6 @@
+require 'active_support/concern'
+require "active_support/core_ext/class/attribute_accessors"
+
 module SceneToolkit
   class Release
     module Validations
