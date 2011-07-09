@@ -1,4 +1,3 @@
-require 'digest/md5'
 require 'scene_toolkit/release/helpers'
 require 'scene_toolkit/release/rename'
 require 'scene_toolkit/release/validations'
@@ -9,7 +8,7 @@ require 'scene_toolkit/release/validations/required_files'
 
 module SceneToolkit
   class Release
-    attr_accessor :name, :path, :uid
+    attr_accessor :name, :path
     attr_accessor :errors, :warnings
 
     include Validations
@@ -24,7 +23,6 @@ module SceneToolkit
     def initialize(path)
       @path = File.expand_path(path)
       @name = File.basename(path)
-      @uid = Digest::MD5.hexdigest(@name.downcase.gsub(/[^A-Z0-9]/i, ' ').gsub(/\s+/, ' '))
       @errors, @warnings = { }, { }
     end
 
