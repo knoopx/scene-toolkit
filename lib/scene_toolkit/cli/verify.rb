@@ -7,6 +7,7 @@ module SceneToolkit
     desc "Verify library or release. Executes all validations if none specified"
     SceneToolkit::Release.available_validations.each { |name, desc| opt name, desc }
     opt "hide-valid", "Do not display valid releases results"
+    opt "ignore-filename-case", "Ignore case when validating SFV/M3U filenames"
     opt "move-invalid-to", "Move INVALID releases to specified folder", :type => :string
     opt "move-valid-to", "Move VALID releases to specified folder", :type => :string
 
@@ -36,7 +37,7 @@ module SceneToolkit
 
       each_release(directory_string) do |release|
         release_count += 1
-        if release.valid?(validations_to_exec)
+        if release.valid?(validations_to_exec, :case_sensitive => !params["ignore-filename-case"])
           valid_releases += 1
           if not params["hide-valid"] or not valid_target_directory.nil?
             heading(release, :green) do

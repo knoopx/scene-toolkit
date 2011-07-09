@@ -6,10 +6,10 @@ module SceneToolkit
     module Validations
       extend ActiveSupport::Concern
 
-      def valid?(validations_to_exec = @available_validations)
+      def valid?(validations_to_exec = @available_validations, params = { })
         @errors, @warnings = { }, { }
         validations_to_exec.each do |name|
-          send("valid_#{name}?")
+          send("valid_#{name}?", params)
         end
         @errors.values.sum { |errors| errors.size }.zero?
       end
