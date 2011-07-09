@@ -24,7 +24,7 @@ module SceneToolkit
             playlist_filename = [candidates.max { |k, v| v.size }.first, ".m3u"].join
 
             playlist_path = File.join(release.path, playlist_filename)
-            if File.exist?(playlist_path) and not params[:force]
+            if File.exist?(playlist_path) and not params["force"]
               error "Playlist #{playlist_filename} already exists. Use --force to replace it."
             else
               info "Generating new playlist: #{playlist_filename}"

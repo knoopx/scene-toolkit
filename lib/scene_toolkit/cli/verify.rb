@@ -20,12 +20,12 @@ module SceneToolkit
         validations_to_exec = SceneToolkit::Release::available_validations.keys
       end
 
-      invalid_target_directory = params.delete(:move_invalid_to)
+      invalid_target_directory = params.delete("move_invalid_to")
       unless invalid_target_directory.nil?
         raise ArgumentError.new("#{invalid_target_directory} does not exist") unless File.directory?(invalid_target_directory)
       end
 
-      valid_target_directory = params.delete(:move_valid_to)
+      valid_target_directory = params.delete("move_valid_to")
       unless valid_target_directory.nil?
         raise ArgumentError.new("#{invalid_target_directory} does not exist") unless File.directory?(valid_target_directory)
       end
@@ -38,7 +38,7 @@ module SceneToolkit
         release_count += 1
         if release.valid?(validations_to_exec)
           valid_releases += 1
-          if not params[:hide_valid] or not valid_target_directory.nil?
+          if not params["hide_valid"] or not valid_target_directory.nil?
             heading(release, :green) do
               print_errors(release)
               print_warnings(release)
