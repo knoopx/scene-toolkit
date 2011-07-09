@@ -1,3 +1,5 @@
+require 'zlib'
+
 module SceneToolkit
   class Release
     module Validations

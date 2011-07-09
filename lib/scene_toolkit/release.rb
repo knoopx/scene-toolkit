@@ -1,6 +1,4 @@
 require 'digest/md5'
-require 'zlib'
-
 require 'scene_toolkit/release/helpers'
 require 'scene_toolkit/release/rename'
 require 'scene_toolkit/release/validations'
