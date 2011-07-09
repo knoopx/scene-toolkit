@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    scene-toolkit (0.2.0)
+    scene-toolkit (0.2.3)
       activesupport (~> 3.0.0)
       colored
       i18n
