@@ -6,9 +6,9 @@ module SceneToolkit
   class CLI < Optitron::CLI
     desc "Verify library or release. Executes all validations if none specified"
     SceneToolkit::Release.available_validations.each { |name, desc| opt name, desc }
-    opt "hide_valid", "Do not display valid releases"
-    opt "move_invalid_to", "Move INVALID releases to specified folder", :type => :string
-    opt "move_valid_to", "Move VALID releases to specified folder", :type => :string
+    opt "hide-valid", "Do not display valid releases results"
+    opt "move-invalid-to", "Move INVALID releases to specified folder", :type => :string
+    opt "move-valid-to", "Move VALID releases to specified folder", :type => :string
 
     def verify(directory_string)
       validations_to_exec = []
@@ -20,12 +20,12 @@ module SceneToolkit
         validations_to_exec = SceneToolkit::Release::available_validations.keys
       end
 
-      invalid_target_directory = params.delete("move_invalid_to")
+      invalid_target_directory = params.delete("move-invalid-to")
       unless invalid_target_directory.nil?
         raise ArgumentError.new("#{invalid_target_directory} does not exist") unless File.directory?(invalid_target_directory)
       end
 
-      valid_target_directory = params.delete("move_valid_to")
+      valid_target_directory = params.delete("move-valid-to")
       unless valid_target_directory.nil?
         raise ArgumentError.new("#{invalid_target_directory} does not exist") unless File.directory?(valid_target_directory)
       end
@@ -38,7 +38,7 @@ module SceneToolkit
         release_count += 1
         if release.valid?(validations_to_exec)
           valid_releases += 1
-          if not params["hide_valid"] or not valid_target_directory.nil?
+          if not params["hide-valid"] or not valid_target_directory.nil?
             heading(release, :green) do
               print_errors(release)
               print_warnings(release)
