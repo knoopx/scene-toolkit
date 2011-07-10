@@ -29,5 +29,10 @@ module SceneToolkit
     def files
       Dir.glob(File.join(@path, "*"))
     end
+
+    def heuristic_name
+      candidates = files.map { |f| File.basename(f, ".*") }.grep(/^00-/)
+      candidates.group_by { |name| name }.max { |name, occurences| occurences.size }.first.gsub(/^00-/, "")
+    end
   end
 end
