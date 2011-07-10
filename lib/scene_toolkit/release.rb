@@ -1,5 +1,5 @@
 require 'scene_toolkit/release/helpers'
-require 'scene_toolkit/release/rename'
+require 'scene_toolkit/release/auto_rename'
 require 'scene_toolkit/release/validations'
 require 'scene_toolkit/release/validations/checksum'
 require 'scene_toolkit/release/validations/name'
@@ -12,7 +12,7 @@ module SceneToolkit
     attr_accessor :errors, :warnings
 
     include Validations
-    include Rename
+    include AutoRename
     include Helpers
 
     include Validations::Checksum

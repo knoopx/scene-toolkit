@@ -2,7 +2,7 @@ require 'active_support/concern'
 
 module SceneToolkit
   class Release
-    module Rename
+    module AutoRename
       extend ActiveSupport::Concern
 
       def rename!(new_name)

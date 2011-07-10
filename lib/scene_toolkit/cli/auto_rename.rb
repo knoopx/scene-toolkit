@@ -23,7 +23,7 @@ module SceneToolkit
 
     desc "Repair release names"
 
-    def rename(directory_string)
+    def auto_rename(directory_string)
       each_release(directory_string) do |release|
         unless release.name.downcase?
           heading(release, :green) { info "Skipping. Release name seems to be OK." }
