@@ -8,7 +8,7 @@ module SceneToolkit
           base.register_validation(:checksum, "Validate release CRC-32 checksum")
         end
 
-        def valid_checksum?(params)
+        def valid_checksum?(params = {})
           @errors[:checksum], @warnings[:checksum] = [], []
           if sfv_files.any?
             sfv_files.each do |sfv|

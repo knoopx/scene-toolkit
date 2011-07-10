@@ -6,7 +6,7 @@ module SceneToolkit
           base.register_validation(:playlist, "Validate playlist against existing files")
         end
 
-        def valid_playlist?(params)
+        def valid_playlist?(params = {})
           @errors[:playlist], @warnings[:playlist] = [], []
           if m3u_files.any?
             m3u_files.each do |playlist|

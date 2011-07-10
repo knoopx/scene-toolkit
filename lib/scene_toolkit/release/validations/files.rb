@@ -8,7 +8,7 @@ module SceneToolkit
           base.register_validation(:files, "Validate inclusion of required files")
         end
 
-        def valid_files?(params)
+        def valid_files?(params = {})
           @errors[:files], @warnings[:files] = [], []
           REQUIRED_FILES.each do |ext|
             file_count = send("#{ext}_files")
