@@ -16,7 +16,7 @@ module SceneToolkit
     class OrlydbMatcher
       def self.match(release)
         regex = Regexp.new(Regexp.escape(release.name), Regexp::IGNORECASE)
-        response = Nestful.get("http://orlydb.com", :params => { :q => release.search_string })
+        response = Nestful.get("http://orlydb.com", :params => { :q => release.name.to_search_string })
         response.scan(regex).uniq.reject(&:downcase?)
       end
     end
