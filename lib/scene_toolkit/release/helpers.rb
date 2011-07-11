@@ -5,6 +5,10 @@ module SceneToolkit
     module Helpers
       extend ActiveSupport::Concern
 
+      def files
+        Dir.glob(File.join(Regexp.escape(@path), "*"))
+      end
+
       included do
         has_files_with_extension :mp3, :sfv, :nfo, :m3u
       end
