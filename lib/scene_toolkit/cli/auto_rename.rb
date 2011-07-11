@@ -6,17 +6,17 @@ require 'scene_toolkit/ext'
 module SceneToolkit
   class CLI < Optitron::CLI
     class GoogleMatcher
-      def self.match(release)
-        regex = Regexp.new(Regexp.escape(release.name), Regexp::IGNORECASE)
-        response = Nestful.get("http://www.google.com/search", :params => { :q => release.name, :num => 100 })
+      def self.match(name)
+        regex = Regexp.new(Regexp.escape(name), Regexp::IGNORECASE)
+        response = Nestful.get("http://www.google.com/search", :params => { :q => name, :num => 100 })
         response.scan(regex).uniq.reject(&:downcase?)
       end
     end
 
-    class OrlydbMatcher
-      def self.match(release)
-        regex = Regexp.new(Regexp.escape(release.name), Regexp::IGNORECASE)
-        response = Nestful.get("http://orlydb.com", :params => { :q => release.name.to_search_string })
+    class OrlyDbMatcher
+      def self.match(name)
+        regex = Regexp.new(Regexp.escape(name), Regexp::IGNORECASE)
+        response = Nestful.get("http://orlydb.com", :params => { :q => name.to_search_string })
         response.scan(regex).uniq.reject(&:downcase?)
       end
     end
@@ -25,14 +25,17 @@ module SceneToolkit
 
     def auto_rename(directory_string)
       each_release(directory_string) do |release|
-        unless release.name.downcase?
-          heading(release, :green) { info "Skipping. Release name seems to be OK." }
-          next
+        next if release.valid_name? and not release.name.downcase?
+
+        if release.valid_name?
+          release_name = release.name
+        else
+          release_name = release.heuristic_name
         end
 
         match = nil
-        [OrlydbMatcher, GoogleMatcher].each do |matcher|
-          matches = matcher.match(release)
+        [OrlyDbMatcher, GoogleMatcher].each do |matcher|
+          matches = matcher.match(release_name)
           if matches.one?
             match = matches.first
             break
