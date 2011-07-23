@@ -1,4 +1,5 @@
 require 'active_support/concern'
+require 'shellwords'
 
 module SceneToolkit
   class Release
@@ -6,7 +7,7 @@ module SceneToolkit
       extend ActiveSupport::Concern
 
       def files
-        Dir.glob(File.join(Regexp.escape(@path), "*"))
+        Dir.glob(File.join(Shellwords.shellescape(@path), "*"))
       end
 
       included do

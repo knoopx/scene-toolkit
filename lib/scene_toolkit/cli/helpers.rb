@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+require 'shellwords'
+
 module SceneToolkit
   class CLI < Optitron::CLI
     protected
@@ -60,7 +62,7 @@ module SceneToolkit
 
       releases = []
 
-      Dir.glob(File.join(Regexp.escape(source), "**", "*.mp3")).each do |file|
+      Dir.glob(File.join(Shellwords.shellescape(source), "**", "*.mp3")).each do |file|
         release_path = File.expand_path(File.dirname(file))
 
         unless releases.include?(release_path)
