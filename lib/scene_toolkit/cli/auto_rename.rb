@@ -33,6 +33,8 @@ module SceneToolkit
           release_name = release.heuristic_name
         end
 
+        next if release_name.blank?
+
         match = nil
         [OrlyDbMatcher, GoogleMatcher].each do |matcher|
           matches = matcher.match(release_name)

@@ -27,8 +27,11 @@ module SceneToolkit
     end
 
     def heuristic_name
-      candidates = (m3u_files + nfo_files + sfv_files).map { |f| File.basename(f, ".*") }
-      candidates.group_by { |name| name }.max { |a, b| a.last.size <=> b.last.size }.first.gsub(/^\d+[-_]/, "")
+      files = (m3u_files + nfo_files + sfv_files).map { |f| File.basename(f, ".*") }
+      candidates = files.group_by { |name| name }.max { |a, b| a.last.size <=> b.last.size }
+      if candidates
+        candidates.first.gsub(/^\d+[-_]/, "")
+      end
     end
   end
 end
