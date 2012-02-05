@@ -20,15 +20,7 @@ module SceneToolkit
           matches = response.scan(regex).reject(&:downcase?).select { |m| m.size == name.size }.uniq
         end
 
-        matches
-      end
-    end
-
-    class OrlyDbMatcher
-      def self.match(name)
-        regex = Regexp.new(Regexp.escape(name), Regexp::IGNORECASE)
-        response = Nestful.get("http://orlydb.com", :params => {:q => name.to_search_string})
-        response.scan(regex).uniq.reject(&:downcase?)
+        matches.reject { |m| m == name }.select { |m| m =~ Release::Validations::Name::REGEXP }
       end
     end
 
@@ -48,7 +40,7 @@ module SceneToolkit
 
         match = nil
         matches = []
-        [OrlyDbMatcher, GoogleMatcher].each do |matcher|
+        [GoogleMatcher].each do |matcher|
           matches = matcher.match(release_name)
           if matches.one?
             match = matches.first
