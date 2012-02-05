@@ -27,7 +27,7 @@ module SceneToolkit
 
     def print_errors(release)
       release.errors.each do |validation, errors|
-        errors.each do |error|
+        errors.uniq.each do |error|
           error "[#{validation.to_s.humanize}] #{error}"
         end
       end
@@ -35,7 +35,7 @@ module SceneToolkit
 
     def print_warnings(release)
       release.warnings.each do |validation, warnings|
-        warnings.each do |warning|
+        warnings.uniq.each do |warning|
           warn "[#{validation.to_s.humanize}] #{warning}"
         end
       end

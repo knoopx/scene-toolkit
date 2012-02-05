@@ -8,16 +8,19 @@ module SceneToolkit
 
         def valid_playlist?(params = {})
           @errors[:playlist], @warnings[:playlist] = [], []
+
+          recover_file!(self.heuristic_filename("m3u"), params["repository"]) if params["repository"] and m3u_files.none?
+
           if m3u_files.any?
             m3u_files.each do |playlist|
               begin
-                validate_playlist(playlist, params[:case_sensitive])
+                validate_playlist(playlist, params["case-sensitive"])
               rescue => e
                 @errors[:playlist] << e.message
               end
             end
           else
-            file_not_found(self.heuristic_filename("m3u"))
+            file_not_found!(self.heuristic_filename("m3u"))
           end
           @errors[:playlist].empty?
         end
@@ -30,15 +33,11 @@ module SceneToolkit
             filename.strip!
             next if filename.blank? or filename.start_with?("#") or filename.start_with?(";")
             if case_sensitive
-              file_not_found(filename) unless File.exist?(File.join(@path, filename))
+              file_not_found!(filename) unless File.exist?(File.join(@path, filename))
             else
-              file_not_found(filename) unless files.select { |file| file.downcase == File.join(@path, filename).downcase }.any?
+              file_not_found!(filename) unless files.select { |file| file.downcase == File.join(@path, filename).downcase }.any?
             end
           end
-        end
-
-        def file_not_found(filename)
-          @errors[:playlist] << "File #{filename.inspect} not found. (#{filename.to_search_string})"
         end
       end
     end

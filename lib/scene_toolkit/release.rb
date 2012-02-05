@@ -1,10 +1,10 @@
 require 'scene_toolkit/release/helpers'
 require 'scene_toolkit/release/auto_rename'
 require 'scene_toolkit/release/validations'
-require 'scene_toolkit/release/validations/checksum'
 require 'scene_toolkit/release/validations/name'
-require 'scene_toolkit/release/validations/playlist'
 require 'scene_toolkit/release/validations/files'
+require 'scene_toolkit/release/validations/playlist'
+require 'scene_toolkit/release/validations/checksum'
 
 module SceneToolkit
   class Release
@@ -27,9 +27,7 @@ module SceneToolkit
     end
 
     def heuristic_name
-      files = (m3u_files + nfo_files + sfv_files).map { |f| File.basename(f, ".*") }
-      candidates = files.group_by { |name| name }.max { |a, b| a.last.size <=> b.last.size }
-      if candidates
+      if candidates = common_filenames
         candidates.first.gsub(/^\d+[-_]/, "")
       else
         self.name
@@ -37,7 +35,18 @@ module SceneToolkit
     end
 
     def heuristic_filename(ext)
-      "00-#{self.heuristic_name.downcase}.#{ext}"
+      if candidates = common_filenames
+        "#{candidates.first}.#{ext}"
+      else
+        "00-#{self.name.downcase}.#{ext}"
+      end
+    end
+
+    protected
+
+    def common_filenames
+      files = (m3u_files + nfo_files + sfv_files).map { |f| File.basename(f, ".*") }
+      files.group_by { |name| name }.max { |a, b| a.last.size <=> b.last.size }
     end
   end
 end

@@ -10,6 +10,7 @@ module SceneToolkit
     opt "ignore-filename-case", "Ignore case when validating SFV/M3U filenames"
     opt "move-invalid-to", "Move INVALID releases to specified folder", :type => :string
     opt "move-valid-to", "Move VALID releases to specified folder", :type => :string
+    opt "repository", "Directory to look up in order to resolve missing files", :type => :string
 
     def verify(directory_string)
       validations_to_exec = []
@@ -23,12 +24,12 @@ module SceneToolkit
 
       invalid_target_directory = params.delete("move-invalid-to")
       unless invalid_target_directory.nil?
-        raise ArgumentError.new("#{invalid_target_directory} does not exist") unless File.directory?(invalid_target_directory)
+        raise ArgumentError.new("#{invalid_target_directory.inspect} does not exist") unless File.directory?(invalid_target_directory)
       end
 
       valid_target_directory = params.delete("move-valid-to")
       unless valid_target_directory.nil?
-        raise ArgumentError.new("#{invalid_target_directory} does not exist") unless File.directory?(valid_target_directory)
+        raise ArgumentError.new("#{valid_target_directory.inspect} does not exist") unless File.directory?(valid_target_directory)
       end
 
       release_count = 0
@@ -37,7 +38,7 @@ module SceneToolkit
 
       each_release(directory_string) do |release|
         release_count += 1
-        if release.valid?(validations_to_exec, :case_sensitive => !params["ignore-filename-case"])
+        if release.valid?(validations_to_exec, params)
           valid_releases += 1
           if not params["hide-valid"] or not valid_target_directory.nil?
             heading(release, :green) do

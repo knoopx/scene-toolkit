@@ -10,29 +10,32 @@ module SceneToolkit
 
         def valid_checksum?(params = {})
           @errors[:checksum], @warnings[:checksum] = [], []
+
+          recover_file!(self.heuristic_filename("sfv"), params["repository"]) if params["repository"] and sfv_files.none?
+
           if sfv_files.any?
             sfv_files.each do |sfv|
               begin
-                validate_checksum(sfv)
+                validate_checksum(sfv, params)
               rescue => e
                 @errors[:checksum] << e.message
               end
             end
           else
-            @errors[:checksum] << "File #{self.heuristic_filename("sfv").inspect} not found. (#{self.heuristic_filename(ext).to_search_string})"
+            file_not_found!(self.heuristic_filename("sfv"))
           end
+
           @errors[:checksum].empty?
         end
 
         protected
 
-        def validate_checksum(sfv)
-          files_to_check = files.inject({}) do |collection, file|
+        def validate_checksum(sfv, params)
+          filenames = files.each_with_object({}) do |file, collection|
             collection[File.basename(file).downcase] = File.expand_path(file)
-            collection
           end
 
-          matched_something = false
+          filename_match = false
           File.read(sfv, :mode => "rb").split(/[\r\n]+/).each do |line|
             line.strip!
 
@@ -41,22 +44,30 @@ module SceneToolkit
             end
 
             if match = /^(.+?)\s+([\dA-Fa-f]{8})$/.match(line)
-              matched_something = true
+              filename_match = true
               filename, checksum = match.captures
               filename.strip!
               next if filename.blank? or filename.start_with?("#") or filename.start_with?(";")
               filename.downcase!
 
-              if files_to_check.has_key?(filename)
-                unless Zlib.crc32(File.read(files_to_check[filename])).eql?(checksum.hex)
-                  @errors[:checksum] << "File #{filename} is corrupted"
+              if params["repository"] and not filenames.has_key?(filename)
+                recover_file!(filename, params["repository"])
+                filenames = files.each_with_object({}) do |file, collection|
+                  collection[File.basename(file).downcase] = File.expand_path(file)
                 end
-              else
-                @errors[:checksum] << "File #{filename} not found"
+              end
+
+              if filenames.has_key?(filename)
+                unless Zlib.crc32(File.read(filenames[filename])).eql?(checksum.hex)
+                  recover_file!(File.basename(filenames[filename]), params["repository"], false) if params["repository"]
+                  unless Zlib.crc32(File.read(filenames[filename])).eql?(checksum.hex)
+                    @errors[:checksum] << "File #{filename} is corrupted. (#{filename.to_search_string})"
+                  end
+                end
               end
             end
           end
-          @warnings[:checksum] << "No files to verify found" unless matched_something
+          @errors[:checksum] << "No files to verify found" unless filename_match
         end
       end
     end

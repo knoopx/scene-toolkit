@@ -2,7 +2,7 @@ module SceneToolkit
   class Release
     module Validations
       module Files
-        REQUIRED_FILES = [:sfv, :nfo, :m3u]
+        REQUIRED_FILES_EXT = [:sfv, :nfo, :m3u]
 
         def self.included(base)
           base.register_validation(:files, "Validate inclusion of required files")
@@ -10,10 +10,16 @@ module SceneToolkit
 
         def valid_files?(params = {})
           @errors[:files], @warnings[:files] = [], []
-          REQUIRED_FILES.each do |ext|
-            file_count = send("#{ext}_files")
-            @errors[:files] << "File #{self.heuristic_filename(ext).inspect} not found. (#{self.heuristic_filename(ext).to_search_string})" if file_count.none?
-            @warnings[:files] << "Multiple *.#{ext} files found." if file_count.size > 1
+          REQUIRED_FILES_EXT.each do |ext|
+            if params["repository"] and not File.exists?(File.join(self.path, self.heuristic_filename(ext)))
+              recover_file!(self.heuristic_filename(ext), params["repository"])
+            end
+
+            required_files = send("#{ext}_files")
+
+            file_not_found!(self.heuristic_filename(ext)) if required_files.none?
+
+            @warnings[:files] << "Multiple *.#{ext} files found." if required_files.size > 1
           end
           @warnings[:files].empty?
         end
