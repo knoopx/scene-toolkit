@@ -19,7 +19,7 @@ module SceneToolkit
               end
             end
           else
-            @errors[:checksum] << "No *.sfv files found"
+            @errors[:checksum] << "File #{self.heuristic_filename("sfv").inspect} not found. (#{self.heuristic_filename(ext).to_search_string})"
           end
           @errors[:checksum].empty?
         end

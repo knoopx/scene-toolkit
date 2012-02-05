@@ -12,7 +12,7 @@ module SceneToolkit
           @errors[:files], @warnings[:files] = [], []
           REQUIRED_FILES.each do |ext|
             file_count = send("#{ext}_files")
-            @errors[:files] << "No *.#{ext} files found." if file_count.none?
+            @errors[:files] << "File #{self.heuristic_filename(ext).inspect} not found. (#{self.heuristic_filename(ext).to_search_string})" if file_count.none?
             @warnings[:files] << "Multiple *.#{ext} files found." if file_count.size > 1
           end
           @warnings[:files].empty?

@@ -31,7 +31,13 @@ module SceneToolkit
       candidates = files.group_by { |name| name }.max { |a, b| a.last.size <=> b.last.size }
       if candidates
         candidates.first.gsub(/^\d+[-_]/, "")
+      else
+        self.name
       end
+    end
+
+    def heuristic_filename(ext)
+      "00-#{self.heuristic_name.downcase}.#{ext}"
     end
   end
 end

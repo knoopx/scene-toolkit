@@ -17,7 +17,7 @@ module SceneToolkit
               end
             end
           else
-            @errors[:playlist] << "No *.m3u files found"
+            file_not_found(self.heuristic_filename("m3u"))
           end
           @errors[:playlist].empty?
         end
@@ -38,7 +38,7 @@ module SceneToolkit
         end
 
         def file_not_found(filename)
-          @errors[:playlist] << "File #{filename} not found"
+          @errors[:playlist] << "File #{filename.inspect} not found. (#{filename.to_search_string})"
         end
       end
     end
