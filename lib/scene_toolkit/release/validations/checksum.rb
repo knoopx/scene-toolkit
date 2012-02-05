@@ -27,7 +27,7 @@ module SceneToolkit
         protected
 
         def validate_checksum(sfv)
-          files_to_check = files.inject({ }) do |collection, file|
+          files_to_check = files.inject({}) do |collection, file|
             collection[File.basename(file).downcase] = File.expand_path(file)
             collection
           end

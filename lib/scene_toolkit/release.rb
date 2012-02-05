@@ -23,7 +23,7 @@ module SceneToolkit
     def initialize(path)
       @path = File.expand_path(path)
       @name = File.basename(path)
-      @errors, @warnings = { }, { }
+      @errors, @warnings = {}, {}
     end
 
     def heuristic_name
