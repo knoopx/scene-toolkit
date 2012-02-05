@@ -15,15 +15,9 @@ module SceneToolkit
           heading(release, :green) do
             print_errors(release)
 
-            candidates = release.files.select { |f| %w(.nfo .m3u .sfv).include?(File.extname(f).downcase) }.group_by { |f| File.basename(f, '.*') }
-            if candidates.none?
-              error "Unable to guess playlist filename"
-              next
-            end
-
-            playlist_filename = [candidates.max { |k, v| v.size }.first, ".m3u"].join
-
+            playlist_filename = release.heuristic_filename("m3u")
             playlist_path = File.join(release.path, playlist_filename)
+
             if File.exist?(playlist_path) and not params["force"]
               error "Playlist #{playlist_filename} already exists. Use --force to replace it."
             else
