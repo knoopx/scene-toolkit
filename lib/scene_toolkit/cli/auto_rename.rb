@@ -1,22 +1,33 @@
 # encoding: utf-8
 
 require 'nestful'
+require 'nokogiri'
 require 'scene_toolkit/ext'
 
 module SceneToolkit
   class CLI < Optitron::CLI
     class GoogleMatcher
       def self.match(name)
-        regex = Regexp.new(Regexp.escape(name), Regexp::IGNORECASE)
-        response = Nestful.get("http://www.google.com/search", :params => { :q => name, :num => 100 })
-        response.scan(regex).uniq.reject(&:downcase?)
+        response = Nestful.get("http://www.google.com/search", :params => {:q => name, :num => 100})
+        response = Nokogiri::HTML(response).search(".g").text
+
+        if name =~ /[\d+]$/ # artist-ablum-2012
+          regex = /#{Regexp.escape(name)}(?:-[A-Za-z0-9]+)*/i
+          matches = response.scan(regex).reject(&:downcase?).reject { |m| m.size == name.size }.uniq
+
+        else # artist-ablum-2012-group
+          regex = /#{Regexp.escape(name)}/i
+          matches = response.scan(regex).reject(&:downcase?).select { |m| m.size == name.size }.uniq
+        end
+
+        matches
       end
     end
 
     class OrlyDbMatcher
       def self.match(name)
         regex = Regexp.new(Regexp.escape(name), Regexp::IGNORECASE)
-        response = Nestful.get("http://orlydb.com", :params => { :q => name.to_search_string })
+        response = Nestful.get("http://orlydb.com", :params => {:q => name.to_search_string})
         response.scan(regex).uniq.reject(&:downcase?)
       end
     end
@@ -36,6 +47,7 @@ module SceneToolkit
         next if release_name.blank?
 
         match = nil
+        matches = []
         [OrlyDbMatcher, GoogleMatcher].each do |matcher|
           matches = matcher.match(release_name)
           if matches.one?
@@ -47,8 +59,10 @@ module SceneToolkit
         if match.present?
           heading(release, :green) { info "Renamed #{release.name} => #{match}" }
           release.rename!(match)
+        elsif matches.any?
+          heading(release, :red) { error (["Multiple matches found for #{release_name}:"] + matches).join("\r\n    * ") }
         else
-          heading(release, :red) { error "No matches found for #{release.name}" }
+          heading(release, :red) { error "No matches found for #{release_name}" }
         end
       end
     end
