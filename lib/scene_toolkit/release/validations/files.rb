@@ -9,7 +9,6 @@ module SceneToolkit
         end
 
         def valid_files?(params = {})
-          @errors[:files], @warnings[:files] = [], []
           REQUIRED_FILES_EXT.each do |ext|
             if params["repository"] and not File.exists?(File.join(self.path, self.heuristic_filename(ext)))
               recover_file!(self.heuristic_filename(ext), params["repository"])
@@ -19,9 +18,9 @@ module SceneToolkit
 
             file_not_found!(self.heuristic_filename(ext)) if required_files.none?
 
-            @warnings[:files] << "Multiple *.#{ext} files found." if required_files.size > 1
+            @warnings << "Multiple *.#{ext} files found." if required_files.size > 1
           end
-          @warnings[:files].empty?
+          @errors.none?
         end
       end
     end

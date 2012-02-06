@@ -7,8 +7,6 @@ module SceneToolkit
         end
 
         def valid_playlist?(params = {})
-          @errors[:playlist], @warnings[:playlist] = [], []
-
           recover_file!(self.heuristic_filename("m3u"), params["repository"]) if params["repository"] and m3u_files.none?
 
           if m3u_files.any?
@@ -16,15 +14,15 @@ module SceneToolkit
               begin
                 validate_playlist(playlist, params["case-sensitive"])
               rescue => e
-                @errors[:playlist] << e.message
+                @errors << e.message
               end
             end
           else
             file_not_found!(self.heuristic_filename("m3u"))
           end
-          @errors[:playlist].empty?
-        end
 
+          @errors.none?
+        end
 
         protected
 

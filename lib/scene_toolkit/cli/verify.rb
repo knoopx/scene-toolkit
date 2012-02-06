@@ -14,12 +14,12 @@ module SceneToolkit
 
     def verify(directory_string)
       validations_to_exec = []
-      SceneToolkit::Release.available_validations.keys.each do |name|
+      SceneToolkit::Release.available_validations.each do |name|
         validations_to_exec << name if params.delete(name).eql?(true)
       end
 
       if validations_to_exec.none?
-        validations_to_exec = SceneToolkit::Release::available_validations.keys
+        validations_to_exec = SceneToolkit::Release::available_validations
       end
 
       invalid_target_directory = params.delete("move-invalid-to")

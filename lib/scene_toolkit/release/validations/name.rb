@@ -9,11 +9,10 @@ module SceneToolkit
         end
 
         def valid_name?(params = {})
-          @errors[:name], @warnings[:name] = [], []
+          @errors << "#{@name.inspect} is not a valid scene release name" unless @name =~ REGEXP
+          @errors << "#{@name.inspect} is lowercased" if @name.eql?(@name.downcase)
 
-          @errors[:name] << "#{@name.inspect} is not a valid scene release name" unless @name =~ REGEXP
-          @errors[:name] << "#{@name.inspect} is lowercased" if @name.eql?(@name.downcase)
-          @errors[:name].empty?
+          @errors.none?
         end
       end
     end

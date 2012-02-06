@@ -9,8 +9,6 @@ module SceneToolkit
         end
 
         def valid_checksum?(params = {})
-          @errors[:checksum], @warnings[:checksum] = [], []
-
           recover_file!(self.heuristic_filename("sfv"), params["repository"]) if params["repository"] and sfv_files.none?
 
           if sfv_files.any?
@@ -18,14 +16,14 @@ module SceneToolkit
               begin
                 validate_checksum(sfv, params)
               rescue => e
-                @errors[:checksum] << e.message
+                @errors << e.message
               end
             end
           else
             file_not_found!(self.heuristic_filename("sfv"))
           end
 
-          @errors[:checksum].empty?
+          @errors.none?
         end
 
         protected
@@ -40,7 +38,7 @@ module SceneToolkit
             line.strip!
 
             if (/(generated|raped)/i =~ line and not /MorGoTH/i =~ line)
-              @warnings[:checksum] << "Possibly tampered SFV: #{line.strip}"
+              @warnings << "Possibly tampered SFV: #{line.strip}"
             end
 
             if match = /^(.+?)\s+([\dA-Fa-f]{8})$/.match(line)
@@ -61,13 +59,13 @@ module SceneToolkit
                 unless Zlib.crc32(File.read(filenames[filename])).eql?(checksum.hex)
                   recover_file!(File.basename(filenames[filename]), params["repository"], false) if params["repository"]
                   unless Zlib.crc32(File.read(filenames[filename])).eql?(checksum.hex)
-                    @errors[:checksum] << "File #{filename} is corrupted. (#{filename.to_search_string})"
+                    @errors << "File #{filename.inspect} is corrupted. (#{filename.to_search_string})"
                   end
                 end
               end
             end
           end
-          @errors[:checksum] << "No files to verify found" unless filename_match
+          @errors << "No files to verify found" unless filename_match
         end
       end
     end

@@ -15,15 +15,15 @@ module SceneToolkit
     include AutoRename
     include Helpers
 
-    include Validations::Checksum
     include Validations::Name
-    include Validations::Playlist
     include Validations::Files
+    include Validations::Playlist
+    include Validations::Checksum
 
     def initialize(path)
       @path = File.expand_path(path)
       @name = File.basename(path)
-      @errors, @warnings = {}, {}
+      @errors, @warnings = [], []
     end
 
     def heuristic_name

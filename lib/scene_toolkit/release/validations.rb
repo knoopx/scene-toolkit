@@ -9,19 +9,21 @@ module SceneToolkit
         validations_to_exec.each do |name|
           send("valid_#{name}?", params)
         end
-        @errors.values.sum { |errors| errors.size }.zero?
+        @errors.none?
       end
 
       protected
 
       def recover_file!(filename, repository, warn = true)
         if repository_file = lookup_file(filename, repository)
-          @warnings[:files] ||= []
-          @warnings[:files] << " * File #{filename.inspect} recovered from #{File.dirname(repository_file).inspect}"
+          target_file = File.join(self.path, filename)
 
-          target_file = File.join(self.path, repository_file)
-          File.delete(target_file) if File.exists?(target_file)
-          FileUtils.mv(repository_file, self.path)
+          unless File.expand_path(target_file) == File.expand_path(repository_file)
+            @warnings << " * File #{filename.inspect} recovered from #{File.dirname(repository_file).inspect}"
+
+            File.delete(target_file) if File.exists?(target_file)
+            FileUtils.mv(repository_file, target_file)
+          end
         else
           file_not_found!(filename)
         end
@@ -32,16 +34,15 @@ module SceneToolkit
       end
 
       def file_not_found!(filename)
-        @errors[:files] ||= []
-        @errors[:files] << "File #{filename.inspect} not found. (#{filename.to_search_string})"
+        @errors << "File #{filename.inspect} not found. (#{filename.to_search_string})"
       end
 
       included do
         cattr_accessor :available_validations
-        @@available_validations = {}
+        @@available_validations = []
 
         def self.register_validation(name, description)
-          @@available_validations[name] = description
+          @@available_validations << name
         end
       end
     end
