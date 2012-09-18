@@ -9,7 +9,7 @@ module SceneToolkit
     class GoogleMatcher
       def self.match(name)
         response = Nestful.get("http://www.google.com/search", :params => {:q => name, :num => 100})
-        response = Nokogiri::HTML(response).search(".g").text
+        response = Nokogiri::HTML(response).search(".g").text.encode("utf-8", "utf-8", :invalid => :replace)
 
         if name =~ /[\d+]$/ # artist-ablum-2012
           regex = /#{Regexp.escape(name)}(?:-[A-Za-z0-9]+)*/i
