@@ -10,7 +10,8 @@ Gem::Specification.new do |s|
   s.summary = "Tool to assist scene MP3 library maintenance"
   s.description = "Tool to assist scene MP3 library maintenance"
 
-  s.files = `git ls-files`.split("\n")
+  s.files = `git ls-files`.split("\n") - ["README.rdoc", "screenshot.png"]
+
   s.test_files = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
 

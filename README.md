@@ -1,10 +1,14 @@
-= Scene-Toolkit
+# Scene-Toolkit
 
-== Description
+## Description
 
-Tool to assist scene MP3 library maintenance
+An utility to assist scene MP3 library maintenance
 
-== Summary
+## Installation
+
+    $ gem install scene-toolkit
+
+## Usage
 
     $ scene-toolkit
 		Commands
@@ -26,8 +30,12 @@ Tool to assist scene MP3 library maintenance
 
 		-?/--help                     # Print help message
 
-== Note on Patches/Pull Requests
- 
+## Screenshot
+
+![Jukebox](https://raw.github.com/knoopx/scene-toolkit/master/screenshot.png)
+
+## Note on Patches/Pull Requests
+
 * Fork the project.
 * Make your feature addition or bug fix.
 * Add tests for it. This is important so I don't break it in a
@@ -36,6 +44,6 @@ Tool to assist scene MP3 library maintenance
   (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
 * Send me a pull request. Bonus points for topic branches.
 
-== Copyright
+## Copyright
 
 Copyright (c) 2010 Víctor Martínez. See LICENSE for details.
