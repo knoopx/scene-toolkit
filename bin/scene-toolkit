@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby -rubygems
 
-require "bundler/setup"
+$: << File.expand_path("../../lib", __FILE__)
 require 'scene_toolkit/cli'
 
 SceneToolkit::CLI.dispatch
