@@ -52,7 +52,23 @@ module SceneToolkit
           heading(release, :green) { info "Renamed #{release.name} => #{match}" }
           release.rename!(match)
         elsif matches.any?
-          heading(release, :red) { error (["Multiple matches found for #{release_name}:"] + matches).join("\r\n    * ") }
+          heading(release, :yellow) do
+            warn "Multiple matches found for #{release_name}"
+            matches.each_with_index do |match, i|
+              puts "    [#{i}] #{match}"
+            end
+            puts
+            print "  Please enter the correct number (or anything else to skip): "
+            begin
+              choice = raw_stty_mode { Integer(STDIN.getc) }
+              match = matches[choice] || raise(ArgumentError)
+              puts choice
+              info "Renamed #{release.name} => #{match}"
+              release.rename!(match)
+            rescue ArgumentError
+              puts "skipped"
+            end
+          end
         else
           heading(release, :red) { error "No matches found for #{release_name}" }
         end

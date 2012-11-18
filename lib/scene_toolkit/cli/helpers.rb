@@ -13,6 +13,15 @@ module SceneToolkit
       puts
     end
 
+    def raw_stty_mode
+      begin
+        system("stty raw -echo")
+        yield
+      ensure
+        system("stty -raw echo")
+      end
+    end
+
     def warn(message)
       puts "  ✕ #{message}".yellow
     end
