@@ -32,7 +32,7 @@ An utility to assist scene MP3 library maintenance
 
 ## Screenshot
 
-![Jukebox](https://raw.github.com/knoopx/scene-toolkit/master/screenshot.png)
+![Jukebox](screenshot.png)
 
 ## Note on Patches/Pull Requests
 
